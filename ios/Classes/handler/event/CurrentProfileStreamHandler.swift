@@ -14,12 +14,12 @@ public class CurrentProfileStreamHandler: NSObject, FlutterStreamHandler {
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
         _eventSink = events
         Mute.shared.notify = { [weak self] muted in
-            guard let self = self, let eventSink = self._eventSink else { return }
+            guard let self else { return }
             DispatchQueue.main.async {
-                if muted {
-                    eventSink(AudibleProfile.SILENT_MODE.rawValue)
+                if (muted) {
+                    self._eventSink?(AudibleProfile.SILENT_MODE.rawValue)
                 } else {
-                    eventSink(AudibleProfile.NORMAL_MODE.rawValue)
+                    self._eventSink?(AudibleProfile.NORMAL_MODE.rawValue)
                 }
             }
         }
