@@ -25,7 +25,7 @@ class CurrentVolumeStreamHandler: NSObject, FlutterStreamHandler {
             forName: NSNotification.Name(rawValue: Constants.VOLUME_NOTIFICATION),
             object: nil,
             queue: nil
-        ) { [weak self] notification in
+        ) { notification in
             guard let self else { return }
             if let volume = notification.userInfo?[Constants.VOLUME_NOTIFICATION_PARAM] as? Float {
                 DispatchQueue.main.async {
