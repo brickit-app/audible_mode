@@ -1,6 +1,6 @@
 name: audible_mode
 description: This plugin lets you know when the Android or iOS device changes its audio profile and lets you know some more information about it.
-version: 2.0.0
+version: 2.0.1
 homepage: https://github.com/andreamainella98/audible_mode
 
 environment:
