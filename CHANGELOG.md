@@ -1,3 +1,7 @@
+## 2.1.0
+* Raise minimum supported SDKs to Flutter 3.44 and Dart 3.12.
+* Migrate Android Gradle configuration to built-in Kotlin for AGP 9 compatibility.
+
 ## 2.0.0
 * Add stream of volume level
 * Removed deprecated android build
