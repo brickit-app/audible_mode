@@ -13,7 +13,7 @@ A new Flutter project.
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Andrea Mainella' => 'andrea.mainella@gmail.com' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'audible_mode/Sources/audible_mode/**/*'
   s.dependency 'Flutter'
   s.dependency 'Mute', '~> 0.6.0'
   s.platform = :ios, '12.0'

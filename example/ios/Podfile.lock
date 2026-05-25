@@ -1,29 +1,16 @@
 PODS:
-  - audible_mode (2.0.0):
-    - Flutter
-    - Mute (~> 0.6.0)
   - Flutter (1.0.0)
-  - Mute (0.6.1)
 
 DEPENDENCIES:
-  - audible_mode (from `.symlinks/plugins/audible_mode/ios`)
   - Flutter (from `Flutter`)
 
-SPEC REPOS:
-  trunk:
-    - Mute
-
 EXTERNAL SOURCES:
-  audible_mode:
-    :path: ".symlinks/plugins/audible_mode/ios"
   Flutter:
     :path: Flutter
 
 SPEC CHECKSUMS:
-  audible_mode: 55c3c8813098be7a39788d89e82578c1925bef74
-  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  Mute: 20135a96076f140cc82bfc8b810e2d6150d8ec7e
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
 
-PODFILE CHECKSUM: c4c93c5f6502fe2754f48404d3594bf779584011
+PODFILE CHECKSUM: 0dbd5a87e0ace00c9610d2037ac22083a01f861d
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

@@ -7,19 +7,20 @@
 
 import Foundation
 import Mute
+import Flutter
 
 public class CurrentProfileStreamHandler: NSObject, FlutterStreamHandler {
-    private var _eventSink: FlutterEventSink?
+    private var eventSink: FlutterEventSink?
 
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        _eventSink = events
+        eventSink = events
         Mute.shared.notify = { [weak self] muted in
             guard let self else { return }
             DispatchQueue.main.async {
-                if (muted) {
-                    self._eventSink?(AudibleProfile.SILENT_MODE.rawValue)
+                if muted {
+                    self.eventSink?(AudibleProfile.SILENT_MODE.rawValue)
                 } else {
-                    self._eventSink?(AudibleProfile.NORMAL_MODE.rawValue)
+                    self.eventSink?(AudibleProfile.NORMAL_MODE.rawValue)
                 }
             }
         }
@@ -27,8 +28,7 @@ public class CurrentProfileStreamHandler: NSObject, FlutterStreamHandler {
     }
 
     public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        _eventSink = nil
+        eventSink = nil
         return nil
     }
 }
-

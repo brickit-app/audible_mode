@@ -6,58 +6,55 @@
 //
 
 import Foundation
+import Flutter
 
-
-public class FlutterHandler{
-    
+public class FlutterHandler {
     private let channel: FlutterMethodChannel
     private let currentProfileEventChannel: FlutterEventChannel
     private let currentVolumeEventChannel: FlutterEventChannel
-    
-    private let _currentVolumeHandler: CurrentVolumeStreamHandler
-    
+
+    private let currentVolumeHandler: CurrentVolumeStreamHandler
+
     init(binding: FlutterPluginRegistrar) {
-        let audibleHandler: AudibleHandler = AudibleHandler();
-        
+        let audibleHandler = AudibleHandler()
+
         channel = FlutterMethodChannel(
             name: Constants.METHOD_CHANNEL,
-            binaryMessenger: binding.messenger());
-        
+            binaryMessenger: binding.messenger()
+        )
+
         currentProfileEventChannel = FlutterEventChannel(
             name: Constants.CURRENT_PROFILE_EVENT,
-            binaryMessenger: binding.messenger());
-        
+            binaryMessenger: binding.messenger()
+        )
+
         currentVolumeEventChannel = FlutterEventChannel(
             name: Constants.CURRENT_VOLUME_EVENT,
-            binaryMessenger: binding.messenger());
-        
-        
-        channel.setMethodCallHandler{(call: FlutterMethodCall, result: FlutterResult) -> Void in
+            binaryMessenger: binding.messenger()
+        )
+
+        channel.setMethodCallHandler { (call: FlutterMethodCall, result: FlutterResult) -> Void in
             switch call.method {
             case Constants.GET_AUDIBLE_MODE:
                 result(audibleHandler.getAudibleProfile())
-                break;
             case Constants.GET_CURRENT_VOLUME:
                 result(audibleHandler.getCurrentVolume())
-                break;
             case Constants.SET_VOLUME:
-                if let args = call.arguments as? Dictionary<String, Any>{
+                if let args = call.arguments as? Dictionary<String, Any> {
                     audibleHandler.setVolume(volume: (args["volume"] as? NSNumber)?.floatValue)
                 }
                 result(true)
-                break;
             case Constants.GET_MAX_VOLUME:
                 result(audibleHandler.getMaxVolume())
-                break;
             default:
                 result("Method not found")
             }
         }
-        _currentVolumeHandler = CurrentVolumeStreamHandler(currentVolumeEventChannel)
+        currentVolumeHandler = CurrentVolumeStreamHandler(currentVolumeEventChannel)
         currentProfileEventChannel.setStreamHandler(CurrentProfileStreamHandler())
     }
-    
-    public func dispose(){
+
+    public func dispose() {
         channel.setMethodCallHandler(nil)
         currentProfileEventChannel.setStreamHandler(nil)
         currentVolumeEventChannel.setStreamHandler(nil)

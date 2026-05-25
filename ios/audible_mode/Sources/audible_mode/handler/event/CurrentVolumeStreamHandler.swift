@@ -9,10 +9,10 @@ import Foundation
 import UIKit
 import AVFoundation
 import MediaPlayer
+import Flutter
 
 class CurrentVolumeStreamHandler: NSObject, FlutterStreamHandler {
     private let volumeEventChannel: FlutterEventChannel
-    private var audioSession = AVAudioSession.sharedInstance()
 
     init(_ eventChannel: FlutterEventChannel) {
         volumeEventChannel = eventChannel
