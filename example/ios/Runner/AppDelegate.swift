@@ -11,6 +11,12 @@ import UIKit
   }
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    // The engine lifecycle tests create and register their own FlutterEngine.
+    // Registering the plugin on the implicit engine as well would install a
+    // second volume observer and replace Mute.shared.notify.
+    if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
+      return
+    }
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
   }
 }

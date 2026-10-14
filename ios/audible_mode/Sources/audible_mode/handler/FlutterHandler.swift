@@ -34,9 +34,9 @@ public class FlutterHandler {
         currentProfileEventChannel = profileChannel
         currentVolumeEventChannel = volumeChannel
         lifecycle = PluginLifecycle(subscriptions: subscriptions) {
-            methodChannel.setMethodCallHandler(nil)
-            profileChannel.setStreamHandler(nil)
-            volumeChannel.setStreamHandler(nil)
+            // detachFromEngineForRegistrar: runs inside FlutterEngine dealloc.
+            // The messenger relay's parent is weak and is already nil, so
+            // unhooking channels here would call that dead messenger.
         }
         currentVolumeHandler = CurrentVolumeStreamHandler(volumeChannel, volume: subscriptions.volume)
         currentProfileHandler = CurrentProfileStreamHandler(profile: subscriptions.profile)
@@ -63,6 +63,10 @@ public class FlutterHandler {
 
     public func dispose() {
         lifecycle.dispose()
+    }
+
+    func invalidateSubscriptions() {
+        lifecycle.invalidateSubscriptions()
     }
 
     deinit {

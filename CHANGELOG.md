@@ -2,6 +2,7 @@
 * Raise minimum supported SDKs to Flutter 3.44 and Dart 3.12.
 * Migrate Android Gradle configuration to built-in Kotlin for AGP 9 compatibility.
 * Fix iOS volume and silent-mode streams so native observers and event sinks are removed on cancel and when the Flutter engine detaches.
+* Drop those observers when the iOS engine context is destroyed, before a queued callback can send on a stopped shell. Detach does not call the messenger after the engine has already deallocated it.
 
 ## 2.0.0
 * Add stream of volume level

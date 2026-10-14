@@ -2,9 +2,62 @@ import 'dart:async';
 
 import 'package:audible_mode/audible_mode.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
+}
+
+/// Headless isolate for the iOS engine lifecycle tests.
+///
+/// Listen and cancel go through the real event channels so the Flutter engine
+/// delivers them to the plugin. The example UI is not started here.
+@pragma('vm:entry-point')
+Future<void> engineProbeMain() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final messenger = ServicesBinding.instance.defaultBinaryMessenger;
+  const probe = MethodChannel('audible_mode_engine_probe');
+  const volume = MethodChannel('CURRENT_VOLUME_EVENT');
+  const profile = MethodChannel('CURRENT_PROFILE_EVENT');
+  const codec = StandardMethodCodec();
+  var volumeEvents = 0;
+  var profileEvents = 0;
+
+  void countEvents(String channel, void Function() record) {
+    messenger.setMessageHandler(channel, (ByteData? reply) async {
+      if (reply != null) {
+        codec.decodeEnvelope(reply);
+        record();
+      }
+      return null;
+    });
+  }
+
+  probe.setMethodCallHandler((call) async {
+    switch (call.method) {
+      case 'listenVolume':
+        countEvents('CURRENT_VOLUME_EVENT', () {
+          volumeEvents += 1;
+        });
+        await volume.invokeMethod<void>('listen');
+      case 'cancelVolume':
+        await volume.invokeMethod<void>('cancel');
+      case 'listenProfile':
+        countEvents('CURRENT_PROFILE_EVENT', () {
+          profileEvents += 1;
+        });
+        await profile.invokeMethod<void>('listen');
+      case 'cancelProfile':
+        await profile.invokeMethod<void>('cancel');
+      case 'volumeCount':
+        return volumeEvents;
+      case 'profileCount':
+        return profileEvents;
+      default:
+        throw PlatformException(code: 'unknown', message: call.method);
+    }
+  });
+  await Completer<void>().future;
 }
 
 class MyApp extends StatefulWidget {
