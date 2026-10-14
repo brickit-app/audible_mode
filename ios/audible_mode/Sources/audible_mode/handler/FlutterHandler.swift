@@ -1,39 +1,47 @@
-//
-//  FlutterHandler.swift
-//  audible_mode
-//
-//  Created by Andrea Mainella on 22/12/21.
-//
-
 import Foundation
 import Flutter
+import Mute
 
 public class FlutterHandler {
     private let channel: FlutterMethodChannel
     private let currentProfileEventChannel: FlutterEventChannel
     private let currentVolumeEventChannel: FlutterEventChannel
-
     private let currentVolumeHandler: CurrentVolumeStreamHandler
+    private let currentProfileHandler: CurrentProfileStreamHandler
+    private let lifecycle: PluginLifecycle
 
     init(binding: FlutterPluginRegistrar) {
         let audibleHandler = AudibleHandler()
+        let subscriptions = AudibleNativeSubscriptions(
+            volume: VolumeObservation(),
+            profile: ProfileObservation(mute: Mute.shared)
+        )
 
-        channel = FlutterMethodChannel(
+        let methodChannel = FlutterMethodChannel(
             name: Constants.METHOD_CHANNEL,
             binaryMessenger: binding.messenger()
         )
-
-        currentProfileEventChannel = FlutterEventChannel(
+        let profileChannel = FlutterEventChannel(
             name: Constants.CURRENT_PROFILE_EVENT,
             binaryMessenger: binding.messenger()
         )
-
-        currentVolumeEventChannel = FlutterEventChannel(
+        let volumeChannel = FlutterEventChannel(
             name: Constants.CURRENT_VOLUME_EVENT,
             binaryMessenger: binding.messenger()
         )
 
-        channel.setMethodCallHandler { (call: FlutterMethodCall, result: FlutterResult) -> Void in
+        channel = methodChannel
+        currentProfileEventChannel = profileChannel
+        currentVolumeEventChannel = volumeChannel
+        lifecycle = PluginLifecycle(subscriptions: subscriptions) {
+            methodChannel.setMethodCallHandler(nil)
+            profileChannel.setStreamHandler(nil)
+            volumeChannel.setStreamHandler(nil)
+        }
+        currentVolumeHandler = CurrentVolumeStreamHandler(volumeChannel, volume: subscriptions.volume)
+        currentProfileHandler = CurrentProfileStreamHandler(profile: subscriptions.profile)
+
+        methodChannel.setMethodCallHandler { (call: FlutterMethodCall, result: FlutterResult) -> Void in
             switch call.method {
             case Constants.GET_AUDIBLE_MODE:
                 result(audibleHandler.getAudibleProfile())
@@ -50,13 +58,21 @@ public class FlutterHandler {
                 result("Method not found")
             }
         }
-        currentVolumeHandler = CurrentVolumeStreamHandler(currentVolumeEventChannel)
-        currentProfileEventChannel.setStreamHandler(CurrentProfileStreamHandler())
+        profileChannel.setStreamHandler(currentProfileHandler)
     }
 
     public func dispose() {
-        channel.setMethodCallHandler(nil)
-        currentProfileEventChannel.setStreamHandler(nil)
-        currentVolumeEventChannel.setStreamHandler(nil)
+        lifecycle.dispose()
+    }
+
+    deinit {
+        let lifecycle = lifecycle
+        if Thread.isMainThread {
+            lifecycle.dispose()
+        } else {
+            DispatchQueue.main.async {
+                lifecycle.dispose()
+            }
+        }
     }
 }

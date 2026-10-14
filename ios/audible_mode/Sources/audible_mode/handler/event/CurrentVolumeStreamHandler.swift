@@ -1,42 +1,26 @@
-//
-//  CurrentVolumeStreamHandler.swift
-//  audible_mode
-//
-//  Created by Andrea Mainella on 03/04/24.
-//
-
 import Foundation
-import UIKit
-import AVFoundation
-import MediaPlayer
 import Flutter
 
 class CurrentVolumeStreamHandler: NSObject, FlutterStreamHandler {
     private let volumeEventChannel: FlutterEventChannel
+    private let volume: VolumeObservation
 
-    init(_ eventChannel: FlutterEventChannel) {
-        volumeEventChannel = eventChannel
+    init(_ eventChannel: FlutterEventChannel, volume: VolumeObservation) {
+        self.volumeEventChannel = eventChannel
+        self.volume = volume
         super.init()
         volumeEventChannel.setStreamHandler(self)
     }
 
     func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        NotificationCenter.default.addObserver(
-            forName: NSNotification.Name(rawValue: Constants.VOLUME_NOTIFICATION),
-            object: nil,
-            queue: nil
-        ) { notification in
-            if let volume = notification.userInfo?[Constants.VOLUME_NOTIFICATION_PARAM] as? Float {
-                DispatchQueue.main.async {
-                    events(Double(volume))
-                }
-            }
+        volume.start { value in
+            events(value)
         }
         return nil
     }
 
     func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        NotificationCenter.default.removeObserver(self)
+        volume.stop()
         return nil
     }
 }
