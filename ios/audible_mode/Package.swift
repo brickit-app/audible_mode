@@ -6,21 +6,21 @@ import PackageDescription
 let package = Package(
     name: "audible_mode",
     platforms: [
-        .iOS("12.0")
+        .iOS("13.0")
     ],
     products: [
         .library(name: "audible-mode", targets: ["audible_mode"])
     ],
     dependencies: [
         .package(name: "FlutterFramework", path: "../FlutterFramework"),
-        .package(url: "https://github.com/akramhussein/Mute.git", from: "0.6.1")
+        .package(url: "https://github.com/akramhussein/Mute.git", from: "0.6.0")
     ],
     targets: [
         .target(
             name: "audible_mode",
             dependencies: [
                 .product(name: "FlutterFramework", package: "FlutterFramework"),
-                "Mute"
+                .product(name: "Mute", package: "Mute")
             ]
         )
     ]

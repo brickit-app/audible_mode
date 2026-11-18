@@ -11,12 +11,16 @@ This plugin use this dependecy:
 ## PAY ATTENTION
 - In the ios simulator it doesn't work
 
+## REQUIREMENTS
+- Flutter 3.44 or later (Dart 3.12)
+- On iOS the plugin supports both Swift Package Manager and CocoaPods
+
 ## HOW TO INSTALL
 ```yaml
 dependencies:
   flutter:
     sdk: flutter
-  audible_mode: ^2.0.0
+  audible_mode: ^4.0.0
 ```
 ## HOW TO USE
 
@@ -50,7 +54,7 @@ Audible.setVolume(0.2)
 ```
 ## SCREENSHOT
 
-| iOS (Iphone 12 Pro - 15.2)                                                                                   | Android (Oneplus 5T - Pixel Experience 11)                                                                       |
+| iOS (Iphone 12 Pro - iOS 26)                                                                                 | Android (Oneplus 5T - Pixel Experience 11)                                                                       |
 |--------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
 | <img src="https://raw.githubusercontent.com/andreamainella98/audible_mode/master/images/ios.gif" width=300/> | <img src="https://raw.githubusercontent.com/andreamainella98/audible_mode/master/images/android.gif" width=300/> |
 
