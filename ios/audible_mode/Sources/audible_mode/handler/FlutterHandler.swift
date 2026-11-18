@@ -1,66 +1,82 @@
-//
-//  FlutterHandler.swift
-//  audible_mode
-//
-//  Created by Andrea Mainella on 22/12/21.
-//
-
 import Foundation
 import Flutter
+import Mute
 
-
-public class FlutterHandler{
-    
+public class FlutterHandler {
     private let channel: FlutterMethodChannel
     private let currentProfileEventChannel: FlutterEventChannel
     private let currentVolumeEventChannel: FlutterEventChannel
-    
-    private let _currentVolumeHandler: CurrentVolumeStreamHandler
-    
+    private let currentVolumeHandler: CurrentVolumeStreamHandler
+    private let currentProfileHandler: CurrentProfileStreamHandler
+    private let lifecycle: PluginLifecycle
+
     init(binding: FlutterPluginRegistrar) {
-        let audibleHandler: AudibleHandler = AudibleHandler();
-        
-        channel = FlutterMethodChannel(
+        let audibleHandler = AudibleHandler()
+        let subscriptions = AudibleNativeSubscriptions(
+            volume: VolumeObservation(),
+            profile: ProfileObservation(mute: Mute.shared)
+        )
+
+        let methodChannel = FlutterMethodChannel(
             name: Constants.METHOD_CHANNEL,
-            binaryMessenger: binding.messenger());
-        
-        currentProfileEventChannel = FlutterEventChannel(
+            binaryMessenger: binding.messenger()
+        )
+        let profileChannel = FlutterEventChannel(
             name: Constants.CURRENT_PROFILE_EVENT,
-            binaryMessenger: binding.messenger());
-        
-        currentVolumeEventChannel = FlutterEventChannel(
+            binaryMessenger: binding.messenger()
+        )
+        let volumeChannel = FlutterEventChannel(
             name: Constants.CURRENT_VOLUME_EVENT,
-            binaryMessenger: binding.messenger());
-        
-        
-        channel.setMethodCallHandler{(call: FlutterMethodCall, result: FlutterResult) -> Void in
+            binaryMessenger: binding.messenger()
+        )
+
+        channel = methodChannel
+        currentProfileEventChannel = profileChannel
+        currentVolumeEventChannel = volumeChannel
+        lifecycle = PluginLifecycle(subscriptions: subscriptions) {
+            // detachFromEngineForRegistrar: runs inside FlutterEngine dealloc.
+            // The messenger relay's parent is weak and is already nil, so
+            // unhooking channels here would call that dead messenger.
+        }
+        currentVolumeHandler = CurrentVolumeStreamHandler(volumeChannel, volume: subscriptions.volume)
+        currentProfileHandler = CurrentProfileStreamHandler(profile: subscriptions.profile)
+
+        methodChannel.setMethodCallHandler { (call: FlutterMethodCall, result: FlutterResult) -> Void in
             switch call.method {
             case Constants.GET_AUDIBLE_MODE:
                 result(audibleHandler.getAudibleProfile())
-                break;
             case Constants.GET_CURRENT_VOLUME:
                 result(audibleHandler.getCurrentVolume())
-                break;
             case Constants.SET_VOLUME:
-                if let args = call.arguments as? Dictionary<String, Any>{
+                if let args = call.arguments as? Dictionary<String, Any> {
                     audibleHandler.setVolume(volume: (args["volume"] as? NSNumber)?.floatValue)
                 }
                 result(true)
-                break;
             case Constants.GET_MAX_VOLUME:
                 result(audibleHandler.getMaxVolume())
-                break;
             default:
                 result("Method not found")
             }
         }
-        _currentVolumeHandler = CurrentVolumeStreamHandler(currentVolumeEventChannel)
-        currentProfileEventChannel.setStreamHandler(CurrentProfileStreamHandler())
+        profileChannel.setStreamHandler(currentProfileHandler)
     }
-    
-    public func dispose(){
-        channel.setMethodCallHandler(nil)
-        currentProfileEventChannel.setStreamHandler(nil)
-        currentVolumeEventChannel.setStreamHandler(nil)
+
+    public func dispose() {
+        lifecycle.dispose()
+    }
+
+    func invalidateSubscriptions() {
+        lifecycle.invalidateSubscriptions()
+    }
+
+    deinit {
+        let lifecycle = lifecycle
+        if Thread.isMainThread {
+            lifecycle.dispose()
+        } else {
+            DispatchQueue.main.async {
+                lifecycle.dispose()
+            }
+        }
     }
 }

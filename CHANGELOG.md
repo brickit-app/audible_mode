@@ -1,3 +1,6 @@
+## Unreleased
+* Ported iOS teardown fixes from the brickit-app fork: clean up observers on engine detach and `destroyContext`, and deliver events on the main thread.
+
 ## 4.0.0
 * Updated the minimum supported SDK version to Flutter 3.44 / Dart 3.12
 * Migrated to built-in Kotlin (removed `kotlin-android` plugin apply, added `kotlin.compilerOptions`)

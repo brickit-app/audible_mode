@@ -10,11 +10,10 @@ import Mute
 import AVKit
 import MediaPlayer
 
-public class AudibleHandler{
-    
+public class AudibleHandler {
     private let audioSession = AVAudioSession.sharedInstance()
     let volumeView = MPVolumeView()
-    
+
     init() {
         do {
             try audioSession.setCategory(.ambient)
@@ -22,32 +21,32 @@ public class AudibleHandler{
         } catch {
             print("Error on getting Volume")
         }
-        Mute.shared.checkInterval = 1.0;
+        Mute.shared.checkInterval = 1.0
     }
-    
-    func getAudibleProfile() -> String{
+
+    func getAudibleProfile() -> String {
         Mute.shared.check()
-        if(Mute.shared.isMute) {
-            return AudibleProfile.SILENT_MODE.rawValue;
+        if Mute.shared.isMute {
+            return AudibleProfile.SILENT_MODE.rawValue
         } else {
-            return AudibleProfile.NORMAL_MODE.rawValue;
+            return AudibleProfile.NORMAL_MODE.rawValue
         }
     }
-    
-    func getCurrentVolume() -> Float{
-        return audioSession.outputVolume;
+
+    func getCurrentVolume() -> Float {
+        return audioSession.outputVolume
     }
-    
-    func getMaxVolume() -> Float{
-        return 1.0;
+
+    func getMaxVolume() -> Float {
+        return 1.0
     }
-    
-    func setVolume(volume: Float?) -> Void{
-        if (volume != nil){
+
+    func setVolume(volume: Float?) {
+        if let volume {
             let slider = volumeView.subviews.first(where: { $0 is UISlider }) as? UISlider
-            
+
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.01) {
-                slider?.value = volume!
+                slider?.value = volume
             }
         }
     }

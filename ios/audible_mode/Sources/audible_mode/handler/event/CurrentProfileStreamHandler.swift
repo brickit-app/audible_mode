@@ -1,31 +1,29 @@
-//
-//  CurrentProfileStreamHandler.swift
-//  audible_mode
-//
-//  Created by Andrea Mainella on 03/04/24.
-//
-
 import Foundation
 import Mute
 import Flutter
 
+extension Mute: MuteSwitchNotifying {}
+
 public class CurrentProfileStreamHandler: NSObject, FlutterStreamHandler {
-    private var _eventSink: FlutterEventSink?
-    
+    private let profile: ProfileObservation
+
+    init(profile: ProfileObservation) {
+        self.profile = profile
+        super.init()
+    }
+
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        _eventSink = events
-        Mute.shared.notify = { muted in
-            if(muted) {
-                self._eventSink!(AudibleProfile.SILENT_MODE.rawValue)
-            } else {
-                self._eventSink!(AudibleProfile.NORMAL_MODE.rawValue)
-            }
+        profile.start { isMuted in
+            let value = isMuted
+                ? AudibleProfile.SILENT_MODE.rawValue
+                : AudibleProfile.NORMAL_MODE.rawValue
+            events(value)
         }
         return nil
     }
-    
+
     public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        _eventSink = nil
+        profile.stop()
         return nil
     }
 }
